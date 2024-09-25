@@ -1,4 +1,30 @@
-from django.shortcuts import render, redirect
+# from django.shortcuts import render, redirect
+# from django.http import HttpResponse, HttpResponseRedirect
+# from django.urls import reverse
+# from django.core import serializers
+# from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+# from django.contrib.auth import authenticate, login, logout
+# from django.contrib.auth.decorators import login_required
+# from django.contrib import messages
+# from main.forms import MoodEntryForm
+# from main.models import MoodEntry
+# import datetime
+
+# @login_required(login_url='/login')
+# def show_main(request):
+#     mood_entries = MoodEntry.objects.filter(user=request.user)
+#     print(f"Logged in user: {request.user.username}")  # Debug print
+
+#     context = {
+#         'name': request.user.username,
+#         'class': 'PBP A',
+#         'npm': '2306165534',
+#         'mood_entries': mood_entries,
+#         'last_login': request.COOKIES['last_login'],
+#     }
+#     return render(request, "main.html", context)
+
+from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.core import serializers
@@ -19,7 +45,7 @@ def show_main(request):
         'class': 'PBP A',
         'npm': '2306165534',
         'mood_entries': mood_entries,
-        'last_login': request.COOKIES['last_login'],
+        'last_login': request.COOKIES.get('last_login', 'Not available'),
     }
     return render(request, "main.html", context)
 
@@ -85,3 +111,26 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+def edit_mood(request, id):
+    # Get mood entry berdasarkan id
+    mood = MoodEntry.objects.get(pk = id)
+
+    # Set mood entry sebagai instance dari form
+    form = MoodEntryForm(request.POST or None, instance=mood)
+
+    if form.is_valid() and request.method == "POST":
+        # Simpan form dan kembali ke halaman awal
+        form.save()
+        return HttpResponseRedirect(reverse('main:show_main'))
+
+    context = {'form': form}
+    return render(request, "edit_mood.html", context)
+
+def delete_mood(request, id):
+    # Get mood berdasarkan id
+    mood = MoodEntry.objects.get(pk = id)
+    # Hapus mood
+    mood.delete()
+    # Kembali ke halaman awal
+    return HttpResponseRedirect(reverse('main:show_main'))

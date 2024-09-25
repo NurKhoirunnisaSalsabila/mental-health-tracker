@@ -87,6 +87,7 @@ def register(request):
             messages.success(request, 'Your account has been successfully created!')
             return redirect('main:login')
     context = {'form':form}
+    print(form)
     return render(request, 'register.html', context)
 
 def login_user(request):
